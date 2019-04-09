@@ -13,14 +13,18 @@ $(function() {
             max_width   : 30,
             max         : 30
         },
-        bar     : {
-            y_size  : 4,
-            y_gap   : 6
+        bar : {
+            y_size      : 4,
+            y_gap       : 6,
+            min_scale   : 12,
+            fx          : 3,
+            fx_val      : -97,
+            fx_image    : 4
         }
     };
 
     var colorpicker = [
-        { color: 0x000000 },
+        { color: 0xff1100 },
         { color: 0xff3300 },
         { color: 0xff6600 },
         { color: 0xff9900 },
@@ -119,23 +123,22 @@ $(function() {
     function initData() {
 
         var complete = function(t) {
-            ///Temp
+            ////Temp
             t = [];
-            for ( var i=0; i<1; ++i ) {
+            for ( var i=0; i<5; ++i ) {
                 var obj = {};
                 obj.Date = String(1980 + i) +'년';
-                for ( var j=0; j<1; ++j ) {
+                for ( var j=0; j<20; ++j ) {
                     if ( i == 0 ) {
-                        obj["테스트"+j] = 200000;
+                        obj["테스트"+j] = 531110;
                     }
                     else {
-                        obj["테스트"+j] = 50000 * Util.randomInt(1,10);
+                        obj["테스트"+j] = 5000 * Util.randomInt(1,100);
                     }
 
                 }
                 t.push(obj);
             }
-
 
             chart.result = t;
             chart.list = [];
@@ -167,8 +170,6 @@ $(function() {
 
             onChart("start");
         };
-
-
 
         // var sheet = '117RNobktAAa7bI3nlkelV0F_Jjq6gXCZdSMp5RYQfAM';
         // var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/' + sheet + '/edit';
@@ -226,10 +227,8 @@ $(function() {
 
                     ///Temp
 
-                    //
                     if ( i == pointMax-1 ) {
                         chart.result_index++;
-                        // TweenMax.delayedCall(i*0.02, onChart("checkPoint"));
                         console.log('result_index : ' + chart.result_index)
                         TweenMax.delayedCall(i*chart.data.updateSpeed, function(index){
                             onChart("checkPoint")
@@ -243,8 +242,7 @@ $(function() {
             case "moveBar":
                 // onChart("moveChart", { num:newData, index: i });
 
-
-                var moveData = t.num/5000;
+                var moveData = (t.num/5000) + 12;
 
                 var moveSpeed = chart.data.updateSpeed * chart.data.checkSpeed;
 
@@ -256,17 +254,16 @@ $(function() {
                     moveType = "minus";
                 }
 
-                TweenMax.to(item.bar[t.index].scale,   moveSpeed, { x: moveData, ease:Linear.easeNone, onUpdate:function(tm){
+                TweenMax.to(item.bar[t.index].scale,   moveSpeed, { x: chart.bar.min_scale + moveData, ease:Linear.easeNone, onUpdate:function(tm){
                     chart.list[tm.index].value = item.bar[tm.index].scale.x;
                     onChart("update", { index: tm.index, currData: chart.list[tm.index].value, toData: tm.toData, type:tm.type });
 
                 }, onUpdateParams:[{index:t.index, toData:moveData, type:moveType }] });
 
-                TweenMax.to(item.bar[t.index].position, moveSpeed, { x: 3 + (moveData/2), ease:Linear.easeNone });
-                TweenMax.to(item.bar_val[t.index].position, moveSpeed, { x: 4 + (moveData), ease:Linear.easeNone });
+                TweenMax.to(item.bar[t.index].position, moveSpeed, { x: chart.bar.fx + (moveData/2), ease:Linear.easeNone });
+                TweenMax.to(item.bar_val[t.index].position, moveSpeed, { x: chart.bar.fx_val + (moveData), ease:Linear.easeNone });
+                TweenMax.to(item.bar_image[t.index].position, moveSpeed, { x: chart.bar.fx_image + (moveData), ease:Linear.easeNone });
 
-                // TweenMax.set(item.bar[i].scale, { x:ri } );
-                // TweenMax.set(item.bar[i].position, { x: 5 + (ri/2) });
                 break;
 
             case "update":
@@ -282,9 +279,25 @@ $(function() {
 
 
                 if ( rankArray[t.index] !== chart.list[t.index].rank ) {
-
                     TweenMax.to(item.bar[t.index].position, 0.6, { y:120 - (rankIndex * chart.bar.y_gap) });
                     TweenMax.to(item.bar_val[t.index].position, 0.6, { y:126 - (rankIndex * chart.bar.y_gap) });
+                    TweenMax.to(item.bar_image[t.index].position, 0.6,{ y:121 - (rankIndex*5.92) });
+
+                    var fontSize = 25 - (rankIndex*0.7);
+                    $("#val_text"+t.index).css({
+                        fontSize: fontSize + 'pt'
+                    })
+
+
+
+
+
+
+                    // TweenMax.to(item.bar[i].position, 0.6, { x: chart.bar.fx + (chart.bar.min_scale/2), y:120 - (rx*chart.bar.y_gap) });
+                    //
+                    //
+
+
 
                     chart.list[t.index].rank = rankIndex;
                 }
@@ -307,7 +320,7 @@ $(function() {
                     valStr += '<font color="#999999">'+currData+'</font>';
                 }
 
-                // $("#val_text"+ t.index).html( valStr );
+                $("#val_text"+ t.index).html( valStr );
 
 
 
@@ -351,8 +364,14 @@ $(function() {
                     // if ( rx > 0 ) {
                         if ( rx !== chart.list[i].rank ) {
 
+                                // TweenMax.to(item.bar[i].position, 0.6, { x: chart.bar.fx + (chart.bar.min_scale/2), y:120 - (rx*chart.bar.y_gap) });
+                                // TweenMax.to(item.bar_image[i].position, 0.6,{ x: chart.bar.fx_image + (chart.bar.min_scale/2), y:121 - (rx*5.92) });
+                                //
 
-                            TweenMax.to(item.bar[rx].position, 0.6, { y:120 - (rx*6) });
+
+
+
+
                         }
                         chart.list[i].rank = rx;
                         if ( chart.list[i].rank === 1 ) {
@@ -429,46 +448,8 @@ $(function() {
     };
 
     function createItem(i) {
-
-        // var loader = new THREE.TextureLoader();
-        // var texture = loader.load('/app/assets/image/weather1.png');
-          //   var material = new THREE.MeshBasicMaterial({
-          //     map: texture,
-          //     side: THREE.DoubleSide,
-          //     opacity: 1
-          //   });
-          //   return material;
-          // }
-          //
-        // Bar
-
-
-
-
-
-
-
-
-
-
         var barGeometry = new THREE.BoxGeometry(1, 1, 1);
         barGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, 1, 0));
-
-
-
-
-        // var floorTx = THREE.ImageUtils.loadTexture( '/app/assets/image/weather1.png' );
-        // floorTx.wrapS = floorTx.wrapT = THREE.RepeatWrapping;
-        // floorTx.repeat.set(2, 2);
-        // var floorMat = new THREE.MeshPhongMaterial( { map: floorTx, specular: 0x050505, shininess: 100});
-        // var floor = new THREE.Mesh(barGeometry, floorMat );
-        // floor.castShadow = true;
-        // floor.receiveShadow = true;
-        // floor.name = "floor";
-        // floor.dynamic = true;
-        // scene.add( floor );
-
-
         var barMaterial = new THREE.MeshPhongMaterial({
             color   : colorpicker[i].color,
         });
@@ -478,27 +459,26 @@ $(function() {
         barMesh.receiveShadow = true;
 
 
-        var mapImage = THREE.ImageUtils.loadTexture( '/app/assets/image/weather1.png' );
+        var mapImage = THREE.ImageUtils.loadTexture( '/app/assets/image/country/png/Korea.png' );
         var barImageMaterial = new THREE.MeshPhongMaterial({
             map: mapImage
         });
         var barImage = new THREE.Mesh(barGeometry, barImageMaterial);
         barImage.name = "bar-image-" + i;
-        // barImage.castShadow = true;
-        // barImage.receiveShadow = true;
+        barImage.castShadow = true;
+        barImage.receiveShadow = true;
 
         scene.add(barMesh);
         scene.add(barImage);
 
-
         item.bar.push(barMesh);
         item.bar_image.push(barImage);
 
-        TweenMax.set(item.bar[i].scale, { x: 0, y: chart.bar.y_size, z:1 });
-        TweenMax.set(item.bar[i].position, { x: 3, z:0 , y:130 - (i*chart.bar.y_gap) });
+        TweenMax.set(item.bar[i].scale, { x: chart.bar.min_scale, y: chart.bar.y_size, z:1 });
+        TweenMax.set(item.bar[i].position, { x: chart.bar.fx + (chart.bar.min_scale/2), z:0 , y:120 - (i*chart.bar.y_gap) });
 
-        TweenMax.set(item.bar_image[i].scale, { x: 5, y:chart.bar.y_size*0.9, z:1 });
-        TweenMax.set(item.bar_image[i].position, { x: 20, z:1.4 , y:120.5 });
+        TweenMax.set(item.bar_image[i].scale, { x: 10, y: chart.bar.y_size*0.8, z:0.3 });
+        TweenMax.set(item.bar_image[i].position, { x: chart.bar.fx_image + (chart.bar.min_scale/2), z:1.4 , y:121 - (i*5.92) });
 
         // world
         var rankGeometry = new THREE.BoxGeometry(1,1,1);
@@ -512,18 +492,41 @@ $(function() {
         rank_mesh.position.y = 126 - (i*chart.bar.y_gap);
         rank_mesh.position.z=  0;
         var rank_text = createTextLabel("rank_text", i);
-        // rank_text.setHTML( ( i+1) );
+        rank_text.setHTML( ( i+1) );
         rank_text.setParent(rank_mesh);
         scene.add(rank_mesh);
         item.bar_rank.push(rank_mesh);
         item.bar_rank_text.push(rank_text);
-        // TweenMax.set(item.bar_text[i].position, { x: 10, z:0 , y:20 - (i*5) });
+
         $("#tdContainer").append(rank_text.element);
+
+        var fontSize = 20 - (i*0.4);
+
+
+
         $("#rank_text"+i).css({
-            fontSize    : '18pt',
+            fontSize    : fontSize + 'pt',
             textAlign   : 'center',
             width       : '30px'
         })
+
+
+        // 
+        // var textMesh	   = new THREEx.Text('THREEx', {
+        // 	font		: "droid serif",
+        // 	weight		: "bold",
+        // 	size		: 1,
+        // 	height		: 0.4,
+        // })
+        // scene.add(textMesh)
+        //
+
+
+
+
+
+
+
 
 
         // world
@@ -534,7 +537,8 @@ $(function() {
         var val_mesh = new THREE.Mesh(valGeometry, valMaterial);
         val_mesh.updateMatrix();
         val_mesh.matrixAutoUpdate = false;
-        val_mesh.position.x = 4;
+
+        val_mesh.position.x = chart.bar.fx_val + (chart.bar.min_scale/2);
         val_mesh.position.y = 125 - (i*chart.bar.y_gap);
         val_mesh.position.z = 0;
         var val_text = createTextLabel("val_text", i);
@@ -545,10 +549,18 @@ $(function() {
         item.bar_val_text.push(val_text);
         $("#tdContainer").append(val_text.element);
 
-        var fontSize = 18;
+        var fontSize = 25 - (i*0.7);
         $("#val_text"+i).css({
             fontSize: fontSize + 'pt'
         })
+        $("#val_text"+ i).html( "테스트" );
+
+
+
+
+
+
+
 
     }
 
