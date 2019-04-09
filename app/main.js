@@ -20,7 +20,7 @@ $(function() {
     };
 
     var colorpicker = [
-        { color: 0xff0000 },
+        { color: 0x000000 },
         { color: 0xff3300 },
         { color: 0xff6600 },
         { color: 0xff9900 },
@@ -92,6 +92,7 @@ $(function() {
         bar_rank_text: [],
         bar_val: [],
         bar_val_text: [],
+        bar_image: []
     };
 
   ///////////////////////
@@ -120,15 +121,15 @@ $(function() {
         var complete = function(t) {
             ///Temp
             t = [];
-            for ( var i=0; i<40; ++i ) {
+            for ( var i=0; i<1; ++i ) {
                 var obj = {};
                 obj.Date = String(1980 + i) +'년';
-                for ( var j=0; j<20; ++j ) {
+                for ( var j=0; j<1; ++j ) {
                     if ( i == 0 ) {
-                        obj["안녕하세요 - 반가워요"+j] = 50000;
+                        obj["테스트"+j] = 200000;
                     }
                     else {
-                        obj["안녕하세요 - 반가워요"+j] = 50000 * Util.randomInt(1,10);
+                        obj["테스트"+j] = 50000 * Util.randomInt(1,10);
                     }
 
                 }
@@ -306,7 +307,7 @@ $(function() {
                     valStr += '<font color="#999999">'+currData+'</font>';
                 }
 
-                $("#val_text"+ t.index).html( valStr );
+                // $("#val_text"+ t.index).html( valStr );
 
 
 
@@ -429,9 +430,8 @@ $(function() {
 
     function createItem(i) {
 
-
-        var loader = new THREE.TextureLoader();
-        var texture = loader.load('/app/assets/image/weather1.png');
+        // var loader = new THREE.TextureLoader();
+        // var texture = loader.load('/app/assets/image/weather1.png');
           //   var material = new THREE.MeshBasicMaterial({
           //     map: texture,
           //     side: THREE.DoubleSide,
@@ -440,25 +440,65 @@ $(function() {
           //   return material;
           // }
           //
-
-
         // Bar
+
+
+
+
+
+
+
+
+
+
         var barGeometry = new THREE.BoxGeometry(1, 1, 1);
         barGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, 1, 0));
 
+
+
+
+        // var floorTx = THREE.ImageUtils.loadTexture( '/app/assets/image/weather1.png' );
+        // floorTx.wrapS = floorTx.wrapT = THREE.RepeatWrapping;
+        // floorTx.repeat.set(2, 2);
+        // var floorMat = new THREE.MeshPhongMaterial( { map: floorTx, specular: 0x050505, shininess: 100});
+        // var floor = new THREE.Mesh(barGeometry, floorMat );
+        // floor.castShadow = true;
+        // floor.receiveShadow = true;
+        // floor.name = "floor";
+        // floor.dynamic = true;
+        // scene.add( floor );
+
+
         var barMaterial = new THREE.MeshPhongMaterial({
-            color: colorpicker[i].color
+            color   : colorpicker[i].color,
         });
         var barMesh = new THREE.Mesh(barGeometry, barMaterial);
         barMesh.name = "bar-" + i;
         barMesh.castShadow = true;
         barMesh.receiveShadow = true;
 
-        scene.add(barMesh);
-        item.bar.push(barMesh);
 
-        TweenMax.set(item.bar[i].scale, { x: 0, y:chart.bar.y_size, z:1 });
+        var mapImage = THREE.ImageUtils.loadTexture( '/app/assets/image/weather1.png' );
+        var barImageMaterial = new THREE.MeshPhongMaterial({
+            map: mapImage
+        });
+        var barImage = new THREE.Mesh(barGeometry, barImageMaterial);
+        barImage.name = "bar-image-" + i;
+        // barImage.castShadow = true;
+        // barImage.receiveShadow = true;
+
+        scene.add(barMesh);
+        scene.add(barImage);
+
+
+        item.bar.push(barMesh);
+        item.bar_image.push(barImage);
+
+        TweenMax.set(item.bar[i].scale, { x: 0, y: chart.bar.y_size, z:1 });
         TweenMax.set(item.bar[i].position, { x: 3, z:0 , y:130 - (i*chart.bar.y_gap) });
+
+        TweenMax.set(item.bar_image[i].scale, { x: 5, y:chart.bar.y_size*0.9, z:1 });
+        TweenMax.set(item.bar_image[i].position, { x: 20, z:1.4 , y:120.5 });
 
         // world
         var rankGeometry = new THREE.BoxGeometry(1,1,1);
@@ -472,7 +512,7 @@ $(function() {
         rank_mesh.position.y = 126 - (i*chart.bar.y_gap);
         rank_mesh.position.z=  0;
         var rank_text = createTextLabel("rank_text", i);
-        rank_text.setHTML( ( i+1) );
+        // rank_text.setHTML( ( i+1) );
         rank_text.setParent(rank_mesh);
         scene.add(rank_mesh);
         item.bar_rank.push(rank_mesh);
@@ -498,7 +538,7 @@ $(function() {
         val_mesh.position.y = 125 - (i*chart.bar.y_gap);
         val_mesh.position.z = 0;
         var val_text = createTextLabel("val_text", i);
-        val_text.setHTML(chart.list[i].name);
+        // val_text.setHTML(chart.list[i].name);
         val_text.setParent(val_mesh);
         scene.add(val_mesh);
         item.bar_val.push(val_mesh);
@@ -556,22 +596,10 @@ $(function() {
 
 
 
-
-
-
-
-
-
-
-
-
-
     function init3DScene() {
 
         // Setup Scene / Camera
         scene = new THREE.Scene();
-
-
 
         // new THREE.OrthographicCamera ( LEFT, RIGHT, TOP, BOTTOM, NEAR, FAR);
         // camera = new THREE.OrthographicCamera( 22, 70, 100, 30, - 500, 1000);
@@ -602,12 +630,9 @@ $(function() {
         console.log(lookDirection);
         lookDirection.y = 100;
         camera.getWorldDirection(lookDirection);
-
-
         camera.updateProjectionMatrix();
 
         scene.position.x = -110;
-
 
         // Setup Renderer
         renderer = new THREE.WebGLRenderer({

@@ -1,6 +1,6 @@
 {
-  "name": "expressDemo",
-  "description": "express demo test app",
+  "name": "mchart3d",
+  "description": "mchart3d",
   "version": "0.0.1",
   "private": true,
   "dependencies": {
